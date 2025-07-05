@@ -1,0 +1,23 @@
+[project]
+name = "print-tools"
+version = "0.1.0"
+description = "Print tools for generating and manipulating PDF documents."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "pypdf2>=3.0.1",
+    "reportlab>=4.4.2",
+    "rich-click>=1.8.9",
+]
+
+[project.scripts]
+print-tools = "print_tools.cli:cli"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.12.2",
+]
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
