@@ -7,7 +7,7 @@ from pathlib import Path
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
-from PyPDF2 import PdfReader, PdfWriter
+from pypdf import PdfReader, PdfWriter
 
 from ..utils import hex_to_colour, register_font
 from ..utils.parsing import parse_blocks

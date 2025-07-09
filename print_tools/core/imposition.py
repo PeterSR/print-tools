@@ -1,4 +1,5 @@
-from PyPDF2 import PdfWriter, Transformation, PageObject
+from pypdf import PdfWriter, Transformation
+from pypdf._page import PageObject
 from reportlab.lib.pagesizes import A3, A4, A5, LETTER   # only for ready‑made sizes
 
 PAGE_SIZES = {
