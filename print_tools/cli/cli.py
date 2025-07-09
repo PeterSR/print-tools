@@ -1,6 +1,7 @@
 import rich_click as click
-from print_tools.imposition.cli import cli as imposition
-from print_tools.templating.cli import cli as templating
+from .imposition import cli as imposition
+from .templating import cli as templating
+from .concat import cli as concat
 
 
 @click.group()
@@ -11,6 +12,7 @@ def cli():
 
 cli.add_command(imposition)
 cli.add_command(templating)
+cli.add_command(concat)
 
 
 if __name__ == "__main__":

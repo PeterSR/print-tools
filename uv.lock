@@ -124,7 +124,7 @@ wheels = [
 [[package]]
 name = "print-tools"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "pypdf2" },
     { name = "reportlab" },

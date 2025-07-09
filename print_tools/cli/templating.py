@@ -2,7 +2,7 @@ from pathlib import Path
 
 import rich_click as click
 
-from .templating import create_labeled_pdfs
+from ..core.templating import create_labeled_pdfs
 
 
 @click.group(name="templating")

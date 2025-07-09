@@ -5,29 +5,13 @@ Templating utilities for overlaying text blocks on PDF templates.
 
 import io
 from pathlib import Path
-from typing import Iterator
 
 from reportlab.pdfgen import canvas
 from reportlab.lib import colors
 from PyPDF2 import PdfReader, PdfWriter
 
-from print_tools.utils import hex_to_colour, register_font
-
-
-def parse_blocks(path: Path) -> Iterator[list[str]]:
-    """Yield list[str] blocks separated by --- lines (ignoring blank lines)."""
-    with path.open(encoding="utf-8") as fh:
-        buf = []
-        for line in fh:
-            line = line.rstrip("\n")
-            if line.strip() == "---":
-                if buf:
-                    yield buf
-                    buf = []
-            elif line.strip():
-                buf.append(line)
-        if buf:
-            yield buf
+from ..utils import hex_to_colour, register_font
+from ..utils.parsing import parse_blocks
 
 
 def create_labeled_pdfs(

@@ -17,3 +17,20 @@ def register_font(name: str):
         pdfmetrics.registerFont(ttfonts.TTFont(short, name))
         return short
     return name
+
+
+def gather_files(input_files: list[Path], ext: str = ".pdf") -> list[Path]:
+    """Gather and validate input files, ensuring they are all PDF files."""
+    pdf_files = []
+
+    for file in input_files:
+        if file.is_dir():
+            # Add all files with the specified extension from the directory
+            pdf_files.extend(list(file.glob(f"*{ext}")))
+        else:
+            if file.suffix.lower() != ext:
+                raise ValueError(f"File {file} is not a {ext} file.")
+
+            pdf_files.append(file)
+
+    return pdf_files
