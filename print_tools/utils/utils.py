@@ -1,4 +1,5 @@
 from pathlib import Path
+from PyPDF2 import PdfReader, PageObject
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics, ttfonts
 
@@ -34,3 +35,23 @@ def gather_files(input_files: list[Path], ext: str = ".pdf") -> list[Path]:
             pdf_files.append(file)
 
     return pdf_files
+
+
+def gather_pdf_pages(input_files: list[Path]):
+    """Gather and validate input files, ensuring they are all PDF files."""
+    pdf_files = gather_files(input_files)
+
+    # For each pdf file, add all pages to the list
+    for pdf in pdf_files:
+        if not pdf.exists():
+            raise FileNotFoundError(f"File {pdf} does not exist.")
+        if pdf.suffix.lower() != ".pdf":
+            raise ValueError(f"File {pdf} is not a PDF file.")
+
+    pages: list[PageObject] = []
+
+    for pdf_file in pdf_files:
+        reader = PdfReader(pdf_file)
+        pages.extend(reader.pages)
+
+    return pages

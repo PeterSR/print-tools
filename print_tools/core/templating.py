@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 Templating utilities for overlaying text blocks on PDF templates.
 """
