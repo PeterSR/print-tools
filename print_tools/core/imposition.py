@@ -11,6 +11,8 @@ def impose_pages_general(
 ):
     w_sheet, h_sheet = get_paper_size(paper)
 
+    print(w_sheet)
+
     result = layouter.perform_layout(
         available_containers=ContainerSpec(
             container=Container(width=w_sheet, height=h_sheet),
@@ -28,7 +30,6 @@ def impose_pages_general(
         writer.add_blank_page(width=container.width, height=container.height)
         for container in result.used_containers
     ]
-    print(len(sheets), "sheets created")
 
     for applied_box in result.applied_boxes:
         page = (

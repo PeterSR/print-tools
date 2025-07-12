@@ -40,14 +40,31 @@ def _impose_impl(input_files: list[Path], output_file: Path, layouter, paper: st
 @click.option(
     "-p",
     "--paper",
-    type=click.Choice(["A3", "A4", "A5", "LETTER"], case_sensitive=False),
+    type=click.Choice(
+        ["A3", "A3-landscape", "A4", "A4-landscape", "A5", "A5-landscape"],
+        case_sensitive=False,
+    ),
     default="A4",
     help="Paper size for the imposed document",
 )
-def impose_grid(input_files: list[Path], output_file: Path, paper: str):
+@click.option(
+    "--padding",
+    type=int,
+    default=0,
+    help="Padding around each PDF page in the grid layout",
+)
+@click.option(
+    "--gap",
+    type=int,
+    default=0,
+    help="Gap between PDF pages in the grid layout",
+)
+def impose_grid(
+    input_files: list[Path], output_file: Path, paper: str, padding: int, gap: int
+):
     """Impose multiple PDF files into a grid layout on a single PDF."""
 
-    layouter = GridLayouter(padding=10, gap=10)
+    layouter = GridLayouter(padding=padding, gap=gap)
 
     _impose_impl(input_files, output_file, layouter, paper)
 
@@ -64,13 +81,30 @@ def impose_grid(input_files: list[Path], output_file: Path, paper: str):
 @click.option(
     "-p",
     "--paper",
-    type=click.Choice(["A3", "A4", "A5", "LETTER"], case_sensitive=False),
+    type=click.Choice(
+        ["A3", "A3-landscape", "A4", "A4-landscape", "A5", "A5-landscape"],
+        case_sensitive=False,
+    ),
     default="A4",
     help="Paper size for the imposed document",
 )
-def impose_booklet(input_files: list[Path], output_file: Path, paper: str):
+@click.option(
+    "--padding",
+    type=int,
+    default=0,
+    help="Padding around each PDF page in the grid layout",
+)
+@click.option(
+    "--gap",
+    type=int,
+    default=0,
+    help="Gap between PDF pages in the grid layout",
+)
+def impose_booklet(
+    input_files: list[Path], output_file: Path, paper: str, padding: int, gap: int
+):
     """Impose multiple PDF files into a booklet layout on a single PDF."""
 
-    layouter = BookletLayouter(padding=10, gap=10)
+    layouter = BookletLayouter(padding=padding, gap=gap)
 
     _impose_impl(input_files, output_file, layouter, paper)

@@ -16,11 +16,14 @@ class GridLayouter(BaseLayouter):
     A layouter that arranges boxes in a grid layout within the available containers.
     It supports padding and gap between boxes.
     The padding is applied around the entire grid, while the gap is applied between boxes.
+    Leeway can be used when boxes that pretty much fit, but not exactly. Leeway is in points.
+    The layout is performed in a left-to-right, bottom-to-top manner.
     """
 
-    def __init__(self, padding: float = 0.0, gap: float = 0.0):
+    def __init__(self, padding: float = 0.0, gap: float = 0.0, leeway: float = 1.0):
         self.padding = padding
         self.gap = gap
+        self.leeway = leeway
 
     def perform_layout(
         self, available_containers: list[Container] | ContainerSpec, boxes: list[Box]
@@ -42,13 +45,14 @@ class GridLayouter(BaseLayouter):
             container = containers[ci]
 
             # Start a new row if the box does not fit horizontally
-            if x + box.width > container.width - self.padding:
+            if x + box.width > container.width - self.padding + self.leeway:
                 x = self.padding
                 y += row_height + self.gap
                 row_height = 0
 
             # Move to next container if the box does not fit vertically
-            if y + box.height > container.height - self.padding:
+            print(y + box.height, container.height)
+            if y + box.height > container.height - self.padding + self.leeway:
                 ci += 1
                 if ci >= len(containers):
                     raise ValueError("Not enough containers to fit all boxes.")
