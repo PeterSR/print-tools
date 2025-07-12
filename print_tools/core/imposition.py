@@ -31,12 +31,16 @@ def impose_pages_general(
     print(len(sheets), "sheets created")
 
     for applied_box in result.applied_boxes:
-        page = pages[applied_box.box_index] if applied_box.box_index < len(pages) else None
+        page = (
+            pages[applied_box.box_index] if applied_box.box_index < len(pages) else None
+        )
 
         if page is None:
             continue
 
-        print(f"Embedding page {applied_box.box_index} onto sheet {applied_box.container_index} at position {applied_box.position}")
+        print(
+            f"Embedding page {applied_box.box_index} onto sheet {applied_box.container_index} at position {applied_box.position}"
+        )
 
         sheet = sheets[applied_box.container_index]
 

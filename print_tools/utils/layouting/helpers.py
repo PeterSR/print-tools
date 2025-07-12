@@ -26,17 +26,17 @@ def quarter_fold_order(pages: int) -> list[int]:
     for k in range(sheets):
         # front
         out += [
-            pages - 4 * k,          # TL
-            2 * k + 1,              # TR
-            2 * k + 2,              # BL
-            pages - (4 * k + 1)     # BR
+            pages - 4 * k,  # TL
+            2 * k + 1,  # TR
+            2 * k + 2,  # BL
+            pages - (4 * k + 1),  # BR
         ]
         # back
         out += [
-            pages - (4 * k + 2),    # TL
-            2 * k + 3,              # TR
-            2 * k + 4,              # BL
-            pages - (4 * k + 3)     # BR
+            pages - (4 * k + 2),  # TL
+            2 * k + 3,  # TR
+            2 * k + 4,  # BL
+            pages - (4 * k + 3),  # BR
         ]
     return out
 

@@ -17,6 +17,7 @@ class SignatureLayouter(BaseLayouter):
         rotate_back_180: rotate every page on the back side 180°.
         padding, gap: forwarded to GridLayouter.
     """
+
     def __init__(
         self,
         signature_pages: int = 0,
@@ -54,9 +55,10 @@ class SignatureLayouter(BaseLayouter):
         if self.rotate_back:
             # every second pair belongs to the back side
             for i, app in enumerate(result.applied_boxes):
-                if (i // 2) % 2 == 1:        # rows of front/back pairs
+                if (i // 2) % 2 == 1:  # rows of front/back pairs
                     app.rotation = (app.rotation + 180) % 360
         return result
+
     # ------------------------------------------------------------
 
 
@@ -65,6 +67,7 @@ class QuarterFoldLayouter(BaseLayouter):
     Very small 4-up quarter-fold layouter (16-page signatures typical).
     Bottom quadrants are rotated 180° so text is upright after the folds.
     """
+
     def __init__(self, padding: float = 0.0, gap: float = 0.0):
         self.grid = GridLayouter(padding=padding, gap=gap)
 
@@ -84,7 +87,7 @@ class QuarterFoldLayouter(BaseLayouter):
         result = self.grid.perform_layout(available_containers, ordered_boxes)
 
         # rotate bottom row on every side
-        cols = 2
+        # cols = 2
         for idx, app in enumerate(result.applied_boxes):
             # idx % 4: 0 TL,1 TR,2 BL,3 BR  → rotate BL & BR
             if idx % 4 in (2, 3):

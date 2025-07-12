@@ -49,7 +49,6 @@ class GridLayouter(BaseLayouter):
 
             # Move to next container if the box does not fit vertically
             if y + box.height > container.height - self.padding:
-                used_containers.append(container)
                 ci += 1
                 if ci >= len(containers):
                     raise ValueError("Not enough containers to fit all boxes.")
@@ -92,7 +91,6 @@ class BookletLayouter(BaseLayouter):
     def __init__(self, padding: float = 0.0, gap: float = 0.0):
         self.grid = GridLayouter(padding=padding, gap=gap)
 
-
     def perform_layout(
         self,
         available_containers: list[Container] | ContainerSpec,
@@ -133,13 +131,12 @@ class BookletLayouter(BaseLayouter):
 
         # Remove the boxes created in this function that represent blanks
         blank_indices = set(
-            i for i, box in enumerate(ordered_boxes)
+            i
+            for i, box in enumerate(ordered_boxes)
             if box.custom_fields.get("blank", False)
         )
         result.applied_boxes = [
-            ab
-            for ab in result.applied_boxes
-            if ab.box_index not in blank_indices
+            ab for ab in result.applied_boxes if ab.box_index not in blank_indices
         ]
 
         # Re-index the result.applied_boxes.box_index to the original boxes
