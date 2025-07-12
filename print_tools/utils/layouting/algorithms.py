@@ -1,3 +1,5 @@
+import math
+
 from .models import (
     AppliedBox,
     BaseLayouter,
@@ -6,6 +8,7 @@ from .models import (
     ContainerSpec,
     LayoutResult,
 )
+from .helpers import imposition_order
 
 
 class GridLayouter(BaseLayouter):
@@ -78,6 +81,79 @@ class GridLayouter(BaseLayouter):
                 "gap": self.gap,
             },
         )
+
+
+class BookletLayouter(BaseLayouter):
+    """
+    Imposes A5-sized pages on A4 sheets in printer-spread order.
+    Assumes every container is an A4 side and each box is half-width (A5).
+    """
+
+    def __init__(self, padding: float = 0.0, gap: float = 0.0):
+        self.grid = GridLayouter(padding=padding, gap=gap)
+
+
+    def perform_layout(
+        self,
+        available_containers: list[Container] | ContainerSpec,
+        boxes: list[Box],
+    ) -> LayoutResult:
+        pages = list(boxes)
+        num_blanks = 0
+        if len(pages) % 4:  # pad blanks if needed
+            num_blanks = 4 - (len(pages) % 4)
+            pages.extend(
+                [
+                    Box(
+                        width=pages[0].width,
+                        height=pages[0].height,
+                        custom_fields={"blank": True},
+                    )
+                ]
+                * num_blanks
+            )
+
+        containers = (
+            available_containers.generate_containers()
+            if isinstance(available_containers, ContainerSpec)
+            else available_containers
+        )
+
+        # one A4 *side* per container, make sure we have enough
+        needed_containers = math.ceil(len(pages) / 2)
+        if needed_containers > len(containers):
+            raise ValueError("Not enough sheet sides supplied")
+
+        # reorder pages for imposition
+        imposed_order = imposition_order(len(pages))
+        ordered_boxes = [pages[i - 1] for i in imposed_order]  # to 0‑based
+
+        # run the existing two‑up grid
+        result = self.grid.perform_layout(containers, ordered_boxes)
+
+        # Remove the boxes created in this function that represent blanks
+        blank_indices = set(
+            i for i, box in enumerate(ordered_boxes)
+            if box.custom_fields.get("blank", False)
+        )
+        result.applied_boxes = [
+            ab
+            for ab in result.applied_boxes
+            if ab.box_index not in blank_indices
+        ]
+
+        # Re-index the result.applied_boxes.box_index to the original boxes
+        for ab in result.applied_boxes:
+            if ab.box_index < len(pages):
+                ab.box_index = imposed_order[ab.box_index] - 1
+
+        # Add custom fields to the result
+        result.custom_fields["num_blanks"] = num_blanks
+        result.custom_fields["imposed_order"] = imposed_order
+        result.custom_fields["padding"] = self.grid.padding
+        result.custom_fields["gap"] = self.grid.gap
+
+        return result
 
 
 if __name__ == "__main__":

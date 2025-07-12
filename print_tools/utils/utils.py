@@ -1,5 +1,5 @@
 from pathlib import Path
-from pypdf import PdfReader, Transformation
+from pypdf import PdfReader
 from pypdf._page import PageObject
 from reportlab.lib import colors
 from reportlab.pdfbase import pdfmetrics, ttfonts
@@ -53,34 +53,3 @@ def gather_pdf_pages(input_files: list[Path]) -> list[PageObject]:
         pages.extend(PdfReader(pdf_file).pages)
 
     return pages
-
-
-def create_transformation(
-    dx: float = 0.0,
-    dy: float = 0.0,
-    rotation: float = 0.0,
-    mirror_horizontal: bool = False,
-    mirror_vertical: bool = False,
-    compensate_mirror_horizontal: float = 0.0,
-    compensate_mirror_vertical: float = 0.0,
-):
-    # Build transformation: mirror (via scale), rotate, then translate.
-    sx = -1.0 if mirror_horizontal else 1.0
-    sy = -1.0 if mirror_vertical else 1.0
-
-    if mirror_horizontal:
-        # compensate for negative x‑scale
-        dx += compensate_mirror_horizontal
-
-    if mirror_vertical:
-        # compensate for negative y‑scale
-        dy += compensate_mirror_vertical
-
-    op = (
-        Transformation()  # identity
-        .scale(sx=sx, sy=sy)  # mirror if needed
-        .rotate(rotation)  # clockwise degrees
-        .translate(tx=dx, ty=dy)  # final placement
-    )
-
-    return op

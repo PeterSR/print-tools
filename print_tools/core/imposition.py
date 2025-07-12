@@ -4,7 +4,6 @@ from pypdf._page import PageObject
 from ..utils.embed import embed_page
 from ..utils.layouting.models import BaseLayouter, Box, Container, ContainerSpec
 from ..utils.paper import PaperRef, get_paper_size
-from ..utils.layouting.algorithms import GridLayouter
 
 
 def impose_pages_general(
@@ -29,9 +28,16 @@ def impose_pages_general(
         writer.add_blank_page(width=container.width, height=container.height)
         for container in result.used_containers
     ]
+    print(len(sheets), "sheets created")
 
     for applied_box in result.applied_boxes:
-        page = pages[applied_box.box_index]
+        page = pages[applied_box.box_index] if applied_box.box_index < len(pages) else None
+
+        if page is None:
+            continue
+
+        print(f"Embedding page {applied_box.box_index} onto sheet {applied_box.container_index} at position {applied_box.position}")
+
         sheet = sheets[applied_box.container_index]
 
         # Embed the page onto the sheet with the specified transformation
@@ -39,17 +45,10 @@ def impose_pages_general(
             sheet,
             page,
             position=applied_box.position,
+            scale=applied_box.scale,
             rotation=applied_box.rotation,
             mirror_horizontal=applied_box.mirror_horizontal,
             mirror_vertical=applied_box.mirror_vertical,
         )
 
     return writer
-
-
-def impose_pages_grid(pages: list[PageObject], paper: PaperRef):
-    """
-    Impose pages in a grid layout on a single PDF sheet.
-    """
-    layouter = GridLayouter(padding=10, gap=10)
-    return impose_pages_general(pages, layouter, paper=paper)

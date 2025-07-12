@@ -5,6 +5,7 @@ from pypdf._page import PageObject
 def create_transformation(
     dx: float = 0.0,
     dy: float = 0.0,
+    scale: float = 1.0,
     rotation: float = 0.0,
     mirror_horizontal: bool = False,
     mirror_vertical: bool = False,
@@ -25,7 +26,7 @@ def create_transformation(
 
     op = (
         Transformation()  # identity
-        .scale(sx=sx, sy=sy)  # mirror if needed
+        .scale(sx=sx * scale, sy=sy * scale)  # apply scale and mirror
         .rotate(rotation)  # clockwise degrees
         .translate(tx=dx, ty=dy)  # final placement
     )
@@ -38,6 +39,7 @@ def embed_page(
     overlay: PageObject,
     *,
     position: tuple[float, float] = (0.0, 0.0),
+    scale: float = 1.0,
     rotation: float = 0.0,
     mirror_horizontal: bool = False,
     mirror_vertical: bool = False,
@@ -54,6 +56,7 @@ def embed_page(
         op = create_transformation(
             dx=position[0],
             dy=position[1],
+            scale=scale,
             rotation=rotation,
             mirror_horizontal=mirror_horizontal,
             mirror_vertical=mirror_vertical,

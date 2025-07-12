@@ -42,6 +42,7 @@ class AppliedBox(BaseModel):
     box_index: int  # Index of the box in the original list
     container_index: int  # Index in used_containers where this box is applied
     position: tuple[float, float] = (0.0, 0.0)  # x, y coordinates
+    scale: float = 1.0  # scale factor
     rotation: float = 0.0  # rotation in degrees
     mirror_horizontal: bool = False
     mirror_vertical: bool = False
