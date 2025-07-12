@@ -25,7 +25,7 @@ def cli():
     "-p",
     "--paper",
     type=click.Choice(["A3", "A4", "A5", "LETTER"]),
-    default="A3",
+    default="A4",
     help="Paper size for the imposed document",
 )
 def impose_grid(input_files: list[Path], output_file: Path, paper: str):

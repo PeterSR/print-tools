@@ -1,36 +1,55 @@
-from pypdf import PdfWriter, Transformation
+from pypdf import PdfWriter
 from pypdf._page import PageObject
-from reportlab.lib.pagesizes import A3, A4, A5, LETTER   # only for ready‑made sizes
 
-PAGE_SIZES = {
-    "A3": A3, "A4": A4, "A5": A5, "LETTER": LETTER,
-}
+from ..utils.embed import embed_page
+from ..utils.layouting.models import BaseLayouter, Box, Container, ContainerSpec
+from ..utils.paper import PaperRef, get_paper_size
+from ..utils.layouting.algorithms import GridLayouter
 
 
-def impose_pages_grid(pages: list[PageObject], paper="A3"):
-    w_sheet, h_sheet = PAGE_SIZES.get(paper, paper)
-    w_page, h_page   = float(pages[0].mediabox.width), float(pages[0].mediabox.height)
+def impose_pages_general(
+    pages: list[PageObject], layouter: BaseLayouter, paper: PaperRef
+):
+    w_sheet, h_sheet = get_paper_size(paper)
 
-    print(f"Source page size: {w_page}x{h_page}, Sheet size: {w_sheet}x{h_sheet}")
-
-    cols, rows = int(w_sheet // w_page), int(h_sheet // h_page)
-    if not (cols and rows):
-        raise ValueError("Source page is bigger than the chosen sheet")
+    result = layouter.perform_layout(
+        available_containers=ContainerSpec(
+            container=Container(width=w_sheet, height=h_sheet),
+            max_amount=100,
+        ),
+        boxes=[
+            Box(width=page.mediabox.width, height=page.mediabox.height)
+            for page in pages
+        ],
+    )
 
     writer = PdfWriter()
-    sheet   = writer.add_blank_page(w_sheet, h_sheet)
-    cap     = cols * rows
-    slot    = 0
 
-    for src in pages:
-        if slot == cap:                # start new sheet
-            sheet, slot = writer.add_blank_page(w_sheet, h_sheet), 0
+    sheets = [
+        writer.add_blank_page(width=container.width, height=container.height)
+        for container in result.used_containers
+    ]
 
-        c, r  = slot % cols, slot // cols
-        tx, ty = c * w_page, r * h_page
-        print(f"Placing page {slot + 1} at {tx}, {ty}")
-        src.add_transformation(Transformation().translate(-tx, -ty))
-        sheet.merge_page(src)
-        slot += 1
+    for applied_box in result.applied_boxes:
+        page = pages[applied_box.box_index]
+        sheet = sheets[applied_box.container_index]
+
+        # Embed the page onto the sheet with the specified transformation
+        embed_page(
+            sheet,
+            page,
+            position=applied_box.position,
+            rotation=applied_box.rotation,
+            mirror_horizontal=applied_box.mirror_horizontal,
+            mirror_vertical=applied_box.mirror_vertical,
+        )
 
     return writer
+
+
+def impose_pages_grid(pages: list[PageObject], paper: PaperRef):
+    """
+    Impose pages in a grid layout on a single PDF sheet.
+    """
+    layouter = GridLayouter(padding=10, gap=10)
+    return impose_pages_general(pages, layouter, paper=paper)
