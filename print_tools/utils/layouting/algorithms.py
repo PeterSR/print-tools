@@ -86,6 +86,146 @@ class GridLayouter(BaseLayouter):
         )
 
 
+
+class PackLayouter(BaseLayouter):
+    """
+    A layouter that tries to pack boxes into the available containers as tightly as possible.
+    It supports padding and gap between boxes.
+    The padding is applied around the entire grid, while the gap is applied between boxes.
+    Leeway can be used when boxes that pretty much fit, but not exactly. Leeway is in points.
+    """
+
+    def __init__(self, padding: float = 0.0, gap: float = 0.0, leeway: float = 1.0):
+        self.padding = padding
+        self.gap = gap
+        self.leeway = leeway
+
+
+    # --------------------------------------------------------------------- #
+    # internal helpers                                                      #
+    # --------------------------------------------------------------------- #
+    def _fits(
+        self,
+        x: float,
+        y: float,
+        w: float,
+        h: float,
+        container: Container,
+        placed: list[tuple[float, float, float, float]],
+    ) -> bool:
+        """Return True if a w x h rectangle can be placed at (x,y)."""
+        # inside inner rectangle defined by padding
+        if (
+            x + w > container.width - self.padding + self.leeway
+            or y + h > container.height - self.padding + self.leeway
+        ):
+            return False
+
+        # keep `gap` distance to every already‑placed rectangle
+        for px, py, pw, ph in placed:
+            if not (
+                x >= px + pw + self.gap
+                or px >= x + w + self.gap
+                or y >= py + ph + self.gap
+                or py >= y + h + self.gap
+            ):
+                return False
+        return True
+
+    # --------------------------------------------------------------------- #
+    # main entry                                                             #
+    # --------------------------------------------------------------------- #
+    def perform_layout(
+        self,
+        available_containers: list[Container] | ContainerSpec,
+        boxes: list[Box],
+    ) -> LayoutResult:
+        # normalise container input ------------------------------------------------
+        containers = (
+            available_containers.generate_containers()
+            if isinstance(available_containers, ContainerSpec)
+            else list(available_containers)
+        )
+        if not containers:
+            raise ValueError("No containers available.")
+
+        # prepare state for every container ---------------------------------------
+        states = [
+            {
+                "placed": [],  # list[(x,y,w,h)]
+                "candidates": [(self.padding, self.padding)],  # bottom‑left seed
+            }
+            for _ in containers
+        ]
+
+        applied_boxes: list[AppliedBox] = []
+        ci = 0  # current container index
+
+        # pack largest boxes first -------------------------------------------------
+        for idx, box in sorted(
+            enumerate(boxes),
+            key=lambda t: max(t[1].width, t[1].height) * min(t[1].width, t[1].height),
+            reverse=True,
+        ):
+            placed = False
+
+            while not placed:
+                if ci >= len(containers):
+                    raise ValueError("Not enough containers to fit all boxes.")
+
+                state = states[ci]
+                cont = containers[ci]
+                cand_list = state["candidates"]
+
+                # iterate through candidate points (sorted by y, then x)
+                while cand_list and not placed:
+                    cx, cy = cand_list.pop(0)
+
+                    for rot, (w, h) in (
+                        (0, (box.width, box.height)),
+                        (90, (box.height, box.width)),
+                    ):
+                        if self._fits(cx, cy, w, h, cont, state["placed"]):
+                            # record placement ------------------------------------
+                            final_cx = cx + w if rot == 90 else cx
+                            applied_boxes.append(
+                                AppliedBox(
+                                    box_index=idx,
+                                    container_index=ci,
+                                    position=(final_cx, cy),
+                                    rotation=rot,
+                                )
+                            )
+                            state["placed"].append((cx, cy, w, h))
+
+                            # new candidate points: to the right, above -----------
+                            cand_list.extend(
+                                [
+                                    (cx + w + self.gap, cy),
+                                    (cx, cy + h + self.gap),
+                                ]
+                            )
+                            # keep candidates ordered (bottom‑left priority) ------
+                            cand_list.sort(key=lambda p: (p[1], p[0]))
+                            placed = True
+                            break  # break rotation loop
+
+                if not placed:
+                    # move on to next container ----------------------------------
+                    ci += 1
+
+        used_containers = containers[: ci + 1]
+
+        return LayoutResult(
+            used_containers=used_containers,
+            applied_boxes=applied_boxes,
+            custom_fields={
+                "padding": self.padding,
+                "gap": self.gap,
+            },
+        )
+
+
 class BookletLayouter(BaseLayouter):
     """
     Imposes A5-sized pages on A4 sheets in printer-spread order.
