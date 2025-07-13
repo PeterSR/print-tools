@@ -35,7 +35,7 @@ def _impose_impl(input_files: list[Path], output_file: Path, layouter, paper: st
     "--output-file",
     type=click.Path(path_type=Path),
     default=Path("output.pdf"),
-    help="Output file path for the concatenated PDF",
+    help="Output file path for the imposed PDF",
 )
 @click.option(
     "-p",
