@@ -7,7 +7,7 @@ from ..core.templating import create_labeled_pdfs
 
 @click.group(name="templating")
 def cli():
-    """Templating tools for generating and manipulating PDF documents."""
+    """Generate PDFs from a PDF template and source material."""
     pass
 
 

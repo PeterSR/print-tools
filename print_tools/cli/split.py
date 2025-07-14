@@ -27,7 +27,7 @@ from ..core.split import split_pdf_pages_by_size
     help="Target paper size for splitting the PDF",
 )
 def cli(input_files: list[Path], output_file: Path, target_paper: str):
-    """Split a PDF into multiple files."""
+    """Split PDF pages into multiple smaller pages."""
 
     pages = gather_pdf_pages(input_files)
 

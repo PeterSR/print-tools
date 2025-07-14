@@ -8,7 +8,7 @@ from ..core.imposition import impose_pages_general
 
 @click.group(name="imposition")
 def cli():
-    """Imposition tools for generating and manipulating PDF documents."""
+    """Perform various imposition layouts on PDF files."""
     pass
 
 
