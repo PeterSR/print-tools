@@ -1,8 +1,35 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "print-tools"
 version = "0.1.0"
-description = "Print tools for generating and manipulating PDF documents."
+description = "Professional PDF manipulation tools for prepress, printing and publishing workflows."
 readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Peter Severin Rasmussen", email = "peter@example.com" }
+]
+maintainers = [
+    { name = "Peter Severin Rasmussen", email = "peter@example.com" }
+]
+keywords = ["pdf", "printing", "prepress", "imposition", "publishing"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: End Users/Desktop",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Multimedia :: Graphics",
+    "Topic :: Office/Business",
+    "Topic :: Printing",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Utilities",
+]
 requires-python = ">=3.13"
 dependencies = [
     "pydantic>=2.11.7",
@@ -11,14 +38,109 @@ dependencies = [
     "rich-click>=1.8.9",
 ]
 
-[project.scripts]
-print-tools = "print_tools.cli:cli"
+[project.urls]
+Homepage = "https://github.com/username/print-tools"
+Documentation = "https://print-tools.readthedocs.io"
+Repository = "https://github.com/username/print-tools.git"
+Issues = "https://github.com/username/print-tools/issues"
+Changelog = "https://github.com/username/print-tools/blob/main/CHANGELOG.md"
 
-[dependency-groups]
+[project.scripts]
+print-tools = "print_tools.cli.cli:cli"
+
+[project.optional-dependencies]
 dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
     "ruff>=0.12.2",
+    "mypy>=1.8.0",
+    "black>=24.0.0",
+    "pre-commit>=3.6.0",
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.5.0",
+    "mkdocstrings[python]>=0.24.0",
+]
+test = [
+    "pytest>=8.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-mock>=3.12.0",
+    "pytest-xdist>=3.5.0",
 ]
 
-#[build-system]
-#requires = ["setuptools>=61.0"]
-#build-backend = "setuptools.build_meta"
+[tool.ruff]
+target-version = "py313"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+    "Q",  # flake8-quotes
+]
+ignore = [
+    "E501",  # line too long, handled by black
+]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["S101"]  # Use of assert detected
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.black]
+target-version = ['py313']
+line-length = 88
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["print_tools"]
+omit = [
+    "tests/*",
+    "*/site-packages/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+]
